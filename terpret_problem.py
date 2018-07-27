@@ -2,7 +2,7 @@ import argparse
 import tensorflow as tf
 import numpy as np
 import sys
-from util import SharedLogDirichletInitializer
+from util import SharedLogDirichletInitializer, MaxEntInitializer
 
 class TerpretProblem:
     """Tensorflow encoding of the 'Terpret problem'"""
@@ -20,7 +20,8 @@ class TerpretProblem:
         # ms : T [k-1, 2]
         # These are the parameters we are trying to optimize for, that control the marginal distribution
         # of the xs in the chain.
-        self.ms = tf.get_variable("ms", shape=[opts.k - 1, 2], initializer=SharedLogDirichletInitializer(opts.alpha, opts.k - 1, 2))
+        initializer = MaxEntInitializer(opts.k - 1, 2) if opts.max_ent else SharedLogDirichletInitializer(opts.alpha, opts.k - 1, 2)
+        self.ms = tf.get_variable("ms", shape=[opts.k - 1, 2], initializer=initializer)
 
         # mus : T [k, 2]
         # These are the parameters for the distributions of the full xs chain.
